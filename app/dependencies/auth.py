@@ -1,16 +1,30 @@
 import httpx
 from fastapi import Depends, HTTPException, status, Request
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler()  # Log to console
+        # logging.FileHandler("app.log")  # Uncomment to log to a file
+    ]
+)
 
 
 AUTH_SERVICE_URL = "http://authentication-service:8000/auth/verify-token"
-
+GET_COMPANY_URL = "http://authentication-service:8000/auth/get_company"
+GET_COMPANY_BY_ID = "http://authentication-service:8000/auth/get_company/{company_id}"
+CREATE_COMPANY = "http://authentication-service:8000/auth/register/company"
+UPDATED_COMPANY = "http://authentication-service:8000/auth/update_company/{company_id}"
+DELETE_COMPANY = "http://authentication-service:8000/auth/delete_company/{company_id}"
 
 async def verify_token(request: Request):
     authorization: str = request.headers.get("Authorization")
     apikey: str = request.headers.get("api-key")
     url = str(request.url)
     
-    if not authorization or authorization.startswith("Bearee "):
+    if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
     if not apikey:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing api key")
@@ -26,6 +40,7 @@ async def verify_token(request: Request):
         
         if response.status_code == 200:
             user_data = response.json()
+            print(f"this is user data in verify {user_data}")
             return user_data
         
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
@@ -36,6 +51,7 @@ def required_role(required_roles:list[str]):
     async def role_permission_dependency(user_data: dict = Depends(verify_token)):
         
         user_role = user_data.get("role")
+        print(f"this is user data {user_role}")
         if not user_role:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="user role not found")
         
@@ -44,7 +60,113 @@ def required_role(required_roles:list[str]):
         
         return user_data
     return role_permission_dependency
+
+
+async def get_company(request: Request):
+    
+    authorization: str = request.headers.get("Authorization")
+    # apikey: str = request.headers.get("api-key")
+    url = str(request.url)
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
+    # if not apikey:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing api key")
+    
+    
+    token = authorization.split("Bearer ")[1]
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(GET_COMPANY_URL, json={"token": token, "from_url": url})
+        
+        if response.status_code == 200:
+            user_data = response.json()
+            return user_data
+        # print(f"this is response.text {response.text}")
+        raise HTTPException(status_code=response.status_code, detail="not authorized")
     
         
+async def get_company_by_id(request: Request, company_id: int):
+    
+    authorization: str = request.headers.get("Authorization")
+    from_url = str(request.url)
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
+    
+    token = authorization.split("Bearer ")[1]
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    
+    async with httpx.AsyncClient() as client:
+        response = await client.post(GET_COMPANY_BY_ID.format(company_id=company_id), json={"token": token, "from_url": from_url})
+        
+        if response.status_code == 200:
+            user_data = response.json()
+            return user_data
+        
+        raise HTTPException(status_code=response.status_code, detail="not authorized")
         
             
+async def create_company(request: Request, company_data: dict):
+    
+    authorization: str = request.headers.get("Authorization")
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
+    
+    token = authorization.split("Bearer ")[1]
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    async with httpx.AsyncClient() as client:
+        headers = {"Authorization": f"Bearer {token}"}
+        response = await client.post(CREATE_COMPANY, json=company_data, headers=headers)
+        
+        if response.status_code == 201:
+            return response.json()
+        logging.info(f"this is logging response.text {response.text}")
+        raise HTTPException(status_code=response.status_code, detail="not authorized")
+    
+
+async def update_company(request: Request, company_id: int, company_data: dict):
+    
+    authorization: str = request.headers.get("Authorization")
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
+    
+    token = authorization.split("Bearer ")[1]
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    async with httpx.AsyncClient() as client:
+        headers = {"Authorization": f"Bearer {token}"}
+        response = await client.put(UPDATED_COMPANY.format(company_id=company_id), json=company_data, headers=headers)
+        
+        if response.status_code == 200:
+            return response.json()
+        logging.info(f"this is logging response.text {response.text}")
+        raise HTTPException(status_code=response.status_code)
+    
+    
+async def delete_company(request: Request, company_id: int):
+    
+    authorization: str = request.headers.get("Authorization")
+    
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
+    
+    token = authorization.split("Bearer ")[1]
+    
+    if not token:  
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    
+    async with httpx.AsyncClient() as client:
+        headers = {"Authorization": f"Bearer {token}"}
+        response = await client.delete(DELETE_COMPANY.format(company_id=company_id), headers=headers)
+        
+        if response.status_code == 200:
+            return response.json()
+        logging.info(f"this is logging response.text {response.text}")
+        raise HTTPException(status_code=response.status_code)
