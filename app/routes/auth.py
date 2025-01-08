@@ -6,7 +6,7 @@ router = APIRouter()
 
 
 @router.get("/super_admin_auth")
-async def admin_auth(user_data: dict = Depends(required_role(["admin"]))):
+async def admin_auth(user_data: dict = Depends(required_role(["super_admin"]))):
     return {"message": "you are the super admin", "user_data": user_data}
 
 

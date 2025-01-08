@@ -11,7 +11,6 @@ logging.basicConfig(
     ]
 )
 
-
 AUTH_SERVICE_URL = "http://authentication-service:8000/auth/verify-token"
 GET_COMPANY_URL = "http://authentication-service:8000/auth/get_company"
 GET_COMPANY_BY_ID = "http://authentication-service:8000/auth/get_company/{company_id}"
@@ -23,27 +22,45 @@ async def verify_token(request: Request):
     authorization: str = request.headers.get("Authorization")
     apikey: str = request.headers.get("api-key")
     url = str(request.url)
-    
+    print(request.headers)
+
     if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
-    if not apikey:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing api key")
-    
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing authorization token"
+        )
     
     token = authorization.split("Bearer ")[1]
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
-    
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or missing token"
+        )
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(AUTH_SERVICE_URL, json={"token": token, "api_key": apikey, "from_url": url})
+        response = await client.post(
+            AUTH_SERVICE_URL, json={"token": token, "api_key": apikey, "from_url": url}
+        )
         
         if response.status_code == 200:
             user_data = response.json()
-            print(f"this is user data in verify {user_data}")
+            user_role = user_data.get("role")
+            print(f"This is user data in verify {user_data}")
+
+            if user_role == "super_admin":
+                return user_data
+
+            if not apikey:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Invalid or missing API key"
+                )
+            
             return user_data
-        
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        )
     
     
 def required_role(required_roles:list[str]):
