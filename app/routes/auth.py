@@ -1,4 +1,7 @@
-from app.dependencies.auth import required_role, get_company, get_company_by_id, create_company, update_company, delete_company
+from app.dependencies.auth import (
+    required_role, get_company, get_company_by_id, create_company, update_company, delete_company, create_user, get_user_by_id, get_all_user,
+    update_user, delete_user
+    )
 from fastapi import Depends, APIRouter
 
 
@@ -38,3 +41,27 @@ async def update_company_data(company_id: int, company_data: dict = Depends(upda
 @router.delete("/delete_company/{company_id}")
 async def delete_company_data(company_id: int, company_data: dict = Depends(delete_company)):
     return company_data
+
+@router.post("/create_user")
+async def create_user_data(user_data: dict = Depends(create_user)):
+    return user_data
+
+@router.get("/get_user/{user_id}")
+async def get_user_data_by_id(user_id: int, user_data: dict = Depends(get_user_by_id)):
+    return user_data
+
+@router.get("/get_user")
+async def get_all_user_data(user_data: dict = Depends(get_all_user)):
+    return user_data
+
+@router.put("/update_user/{user_id}")
+async def update_user_data(user_id: int, user_data: dict = Depends(update_user)):
+    return user_data
+
+@router.delete("/delete_user/{user_id}")
+async def delete_user_data(user_id: int, user_data: dict = Depends(delete_user)):
+    return user_data
+
+# @router.post("/create_role")
+# async def create_role_data(role: dict = Depends(create_role)):
+#     return {"message": "role created"}

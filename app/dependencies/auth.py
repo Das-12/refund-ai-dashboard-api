@@ -17,6 +17,11 @@ GET_COMPANY_BY_ID = "http://authentication-service:8000/auth/get_company/{compan
 CREATE_COMPANY = "http://authentication-service:8000/auth/register/company"
 UPDATED_COMPANY = "http://authentication-service:8000/auth/update_company/{company_id}"
 DELETE_COMPANY = "http://authentication-service:8000/auth/delete_company/{company_id}"
+CREATE_USER = "http://authentication-service:8000/auth/register/user"
+GET_USER_BY_ID = "http://authentication-service:8000/auth/get_user/{user_id}"
+GET_ALL_USER = "http://authentication-service:8000/auth/get_all_user"
+UPDATE_USER = "http://authentication-service:8000/auth/update_user/{user_id}"
+DELETE_USER = "http://authentication-service:8000/auth/delete_user/{user_id}"
 
 async def verify_token(request: Request):
     authorization: str = request.headers.get("Authorization")
@@ -79,21 +84,13 @@ def required_role(required_roles:list[str]):
     return role_permission_dependency
 
 
-async def get_company(request: Request):
+
+async def get_company(request: Request, auth_user: dict = Depends(required_role(["super_admin"]))):
     
-    authorization: str = request.headers.get("Authorization")
-    # apikey: str = request.headers.get("api-key")
+    token = request.headers.get("Authorization").split("Bearer ")[1]
     url = str(request.url)
-    
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
-    # if not apikey:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing api key")
-    
-    
-    token = authorization.split("Bearer ")[1]
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     
     async with httpx.AsyncClient() as client:
         response = await client.post(GET_COMPANY_URL, json={"token": token, "from_url": url})
@@ -105,17 +102,13 @@ async def get_company(request: Request):
         raise HTTPException(status_code=response.status_code, detail="not authorized")
     
         
-async def get_company_by_id(request: Request, company_id: int):
+async def get_company_by_id(request: Request, company_id: int, auth_user: dict = Depends(required_role(["super_admin"]))):
     
-    authorization: str = request.headers.get("Authorization")
+    token = request.headers.get("Authorization").split("Bearer ")[1]
     from_url = str(request.url)
     
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
-    
-    token = authorization.split("Bearer ")[1]
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     
     async with httpx.AsyncClient() as client:
         response = await client.post(GET_COMPANY_BY_ID.format(company_id=company_id), json={"token": token, "from_url": from_url})
@@ -127,16 +120,12 @@ async def get_company_by_id(request: Request, company_id: int):
         raise HTTPException(status_code=response.status_code, detail="not authorized")
         
             
-async def create_company(request: Request, company_data: dict):
+async def create_company(request: Request, company_data: dict, auth_user: dict = Depends(required_role(["super_admin"]))):
     
-    authorization: str = request.headers.get("Authorization")
+    token = request.headers.get("Authorization").split("Bearer ")[1]
     
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
-    
-    token = authorization.split("Bearer ")[1]
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     async with httpx.AsyncClient() as client:
         headers = {"Authorization": f"Bearer {token}"}
         response = await client.post(CREATE_COMPANY, json=company_data, headers=headers)
@@ -147,16 +136,12 @@ async def create_company(request: Request, company_data: dict):
         raise HTTPException(status_code=response.status_code, detail="not authorized")
     
 
-async def update_company(request: Request, company_id: int, company_data: dict):
+async def update_company(request: Request, company_id: int, company_data: dict, auth_user: dict = Depends(required_role(["super_admin"]))):
     
-    authorization: str = request.headers.get("Authorization")
+    token = request.headers.get("Authorization").split("Bearer ")[1]
     
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
-    
-    token = authorization.split("Bearer ")[1]
-    if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     async with httpx.AsyncClient() as client:
         headers = {"Authorization": f"Bearer {token}"}
         response = await client.put(UPDATED_COMPANY.format(company_id=company_id), json=company_data, headers=headers)
@@ -167,17 +152,12 @@ async def update_company(request: Request, company_id: int, company_data: dict):
         raise HTTPException(status_code=response.status_code)
     
     
-async def delete_company(request: Request, company_id: int):
+async def delete_company(request: Request, company_id: int, auth_user: dict = Depends(required_role(["super_admin"]))):
     
-    authorization: str = request.headers.get("Authorization")
+    token = request.headers.get("Authorization").split("Bearer ")[1]
     
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing authorization token")
-    
-    token = authorization.split("Bearer ")[1]
-    
-    if not token:  
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="invalid or missing token")
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     
     async with httpx.AsyncClient() as client:
         headers = {"Authorization": f"Bearer {token}"}
@@ -187,3 +167,84 @@ async def delete_company(request: Request, company_id: int):
             return response.json()
         logging.info(f"this is logging response.text {response.text}")
         raise HTTPException(status_code=response.status_code)
+    
+    
+async def create_user(request: Request, user_data: dict, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
+    
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
+    
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.post(CREATE_USER, json=user_data, headers=headers)
+            
+            if response.status_code == 201:
+                return response.json()
+            logging.info(f"this is logging response.text {response.text}")
+            raise HTTPException(status_code=response.status_code)
+    else:    
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+    
+
+async def get_user_by_id(request: Request, user_id: int, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
+    
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.get(GET_USER_BY_ID.format(user_id=user_id), headers=headers)
+            if response.status_code == 200:
+                user_data = response.json()
+                return user_data
+            raise HTTPException(status_code=response.status_code)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+
+async def get_all_user(request: Request, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
+    
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
+    
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.get(GET_ALL_USER, headers=headers)
+            if response.status_code == 200:
+                user_data = response.json()
+                return user_data
+            raise HTTPException(status_code=response.status_code)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+
+async def update_user(request: Request, user_id: int, user_data: dict, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
+    
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.put(UPDATE_USER.format(user_id = user_id), json=user_data, headers=headers)
+            if response.status_code == 200:
+                return response.json()
+            raise HTTPException(status_code=response.status_code)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+    
+    
+async def delete_user(request: Request, user_id: int, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
+    
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.delete(DELETE_USER.format(user_id=user_id), headers=headers)
+            if response.status_code == 200:
+                return response.json()
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+
+    
