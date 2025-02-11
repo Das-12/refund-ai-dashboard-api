@@ -69,7 +69,7 @@ async def verify_token(request: Request):
     
     
 def required_role(required_roles:list[str]):
-    
+
     async def role_permission_dependency(user_data: dict = Depends(verify_token)):
         
         user_role = user_data.get("role")

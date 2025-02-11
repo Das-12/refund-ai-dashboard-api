@@ -1,0 +1,72 @@
+from app.dependencies.roles import (
+    required_role, create_roles, assign_role, get_async_client, roles_from_token,
+    roles_from_username, get_all_roles
+    )
+from fastapi import Depends, APIRouter
+from app.schemas.roles import RoleCreate, RoleOut, AssignRoleRequest, AssignRoleOut, MultiRoleOut
+from fastapi import HTTPException, status, Request
+import httpx
+from typing import List
+
+router = APIRouter()
+
+@router.post("/create_role", response_model=RoleOut)
+async def create_role(
+    request: Request,
+    role_data: RoleCreate,  # Pydantic model
+    auth_user: dict = Depends(required_role(["super_admin"])),
+    client: httpx.AsyncClient = Depends(get_async_client)
+):
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+
+    role_dict = role_data.model_dump()  
+
+    role_out = await create_roles(request, role_dict, client=client)
+    return role_out
+
+@router.get("/roles", response_model = List[MultiRoleOut])
+async def get_all_role(
+    request: Request,
+    client: httpx.AsyncClient = Depends(get_async_client)
+):
+    roles_data = await get_all_roles(request, client)
+    return roles_data
+
+@router.post("/assign_role", response_model=AssignRoleOut)
+async def assign_roles(
+    request: Request,
+    role_data: AssignRoleRequest,  # Pydantic model
+    auth_user: dict = Depends(required_role(["super_admin"])),
+    client: httpx.AsyncClient = Depends(get_async_client)
+):
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+
+    role_dict = role_data.model_dump()  
+
+    role_out = await assign_role(request, role_dict, client = client)
+    return role_out
+
+@router.get("/get_user_role_token", response_model=AssignRoleOut)
+async def get_user_role_token(
+    request: Request,
+    client: httpx.AsyncClient = Depends(get_async_client)
+):
+    role_out = await roles_from_token(request, client = client)
+    
+    return role_out
+
+
+@router.get("/roles/{username}", response_model=AssignRoleOut)
+async def dashboard_get_user_roles(
+    username: str,
+    request: Request,
+    client: httpx.AsyncClient = Depends(get_async_client)
+):
+    """
+    Dashboard endpoint that returns the roles for a given username.
+    """
+    roles_data = await roles_from_username(request, username, client)
+    return roles_data
+
