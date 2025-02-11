@@ -15,21 +15,27 @@ async def create_plan(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    plan_dict = plan_data.model_dump()  
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        plan_dict = plan_data.model_dump()  
 
-    plan_out = await create_plan(request, plan_dict, client)
-    return plan_out
+        plan_out = await create_plan(request, plan_dict, client)
+        return plan_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/plans", response_model = List[Plan])
 async def get_all_plans(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    plans_data = await get_all_plans(request, client)
-    return plans_data
+    try:
+        plans_data = await get_all_plans(request, client)
+        return plans_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/plans/{plan_id}", response_model = Plan)
 async def get_plan_by_id(
@@ -38,11 +44,14 @@ async def get_plan_by_id(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    plan_data = await get_plan_by_id(request, plan_id, client)
-    return plan_data
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        plan_data = await get_plan_by_id(request, plan_id, client)
+        return plan_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.put("/plans/{plan_id}", response_model = Plan)
 async def update_plan(
@@ -52,13 +61,16 @@ async def update_plan(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    plan_dict = plan_data.model_dump()  
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        plan_dict = plan_data.model_dump()  
 
-    plan_out = await update_plan(request, plan_id, plan_dict, client)
-    return plan_out
+        plan_out = await update_plan(request, plan_id, plan_dict, client)
+        return plan_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.delete("/plans/{plan_id}", response_model = Plan)
 async def delete_plan(
@@ -67,8 +79,11 @@ async def delete_plan(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    plan_data = await delete_plan(request, plan_id, client)
-    return plan_data
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        plan_data = await delete_plan(request, plan_id, client)
+        return plan_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")

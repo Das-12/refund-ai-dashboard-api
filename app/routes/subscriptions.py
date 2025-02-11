@@ -15,21 +15,27 @@ async def create_subscription(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    subscription_dict = subscription_data.model_dump()  
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        subscription_dict = subscription_data.model_dump()  
 
-    subscription_out = await create_subscription(request, subscription_dict, client)
-    return subscription_out
+        subscription_out = await create_subscription(request, subscription_dict, client)
+        return subscription_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/subscriptions", response_model = List[SubscriptionResponse])
 async def get_all_subscriptions(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    subscriptions_data = await get_all_subscriptions(request, client)
-    return subscriptions_data
+    try:
+        subscriptions_data = await get_all_subscriptions(request, client)
+        return subscriptions_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/subscriptions/{subscription_id}", response_model = SubscriptionResponse)
 async def get_subscription_by_id(
@@ -38,11 +44,14 @@ async def get_subscription_by_id(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    subscription_data = await get_subscription_by_id(request, subscription_id, client)
-    return subscription_data
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        subscription_data = await get_subscription_by_id(request, subscription_id, client)
+        return subscription_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.put("/subscriptions/{subscription_id}", response_model = SubscriptionResponse)
 async def update_subscription(
@@ -52,13 +61,16 @@ async def update_subscription(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    subscription_dict = subscription_data.model_dump()  
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        subscription_dict = subscription_data.model_dump()  
 
-    subscription_out = await update_subscription(request, subscription_id, subscription_dict, client)
-    return subscription_out
+        subscription_out = await update_subscription(request, subscription_id, subscription_dict, client)
+        return subscription_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.delete("/subscriptions/{subscription_id}", response_model = SubscriptionResponse)
 async def delete_subscription(
@@ -67,8 +79,11 @@ async def delete_subscription(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-    
-    subscription_data = await delete_subscription(request, subscription_id, client)
-    return subscription_data
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        
+        subscription_data = await delete_subscription(request, subscription_id, client)
+        return subscription_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")

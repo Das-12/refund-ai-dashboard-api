@@ -17,21 +17,27 @@ async def create_role(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
 
-    role_dict = role_data.model_dump()  
+        role_dict = role_data.model_dump()  
 
-    role_out = await create_roles(request, role_dict, client=client)
-    return role_out
+        role_out = await create_roles(request, role_dict, client=client)
+        return role_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/roles", response_model = List[MultiRoleOut])
 async def get_all_role(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    roles_data = await get_all_roles(request, client)
-    return roles_data
+    try:
+        roles_data = await get_all_roles(request, client)
+        return roles_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.post("/assign_role", response_model=AssignRoleOut)
 async def assign_roles(
@@ -40,22 +46,28 @@ async def assign_roles(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    if auth_user.get("role") != "super_admin":
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+    try:
+        if auth_user.get("role") != "super_admin":
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
 
-    role_dict = role_data.model_dump()  
+        role_dict = role_data.model_dump()  
 
-    role_out = await assign_role(request, role_dict, client = client)
-    return role_out
+        role_out = await assign_role(request, role_dict, client = client)
+        return role_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/get_user_role_token", response_model=AssignRoleOut)
 async def get_user_role_token(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    role_out = await roles_from_token(request, client = client)
-    
-    return role_out
+    try:
+        role_out = await roles_from_token(request, client = client)
+        
+        return role_out
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 
 @router.get("/roles/{username}", response_model=AssignRoleOut)
@@ -67,6 +79,9 @@ async def dashboard_get_user_roles(
     """
     Dashboard endpoint that returns the roles for a given username.
     """
-    roles_data = await roles_from_username(request, username, client)
-    return roles_data
+    try:
+        roles_data = await roles_from_username(request, username, client)
+        return roles_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
