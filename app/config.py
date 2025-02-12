@@ -16,8 +16,8 @@ class Settings(BaseSettings):
     MONGO_PORT:int = 27017
     MONGO_AUTH_SOURCE:str = 'admin'
     
-    KAFKA_TOPIC = 'auth_logging'
-    KAFKA_APP_ERROR_TOPIC = 'app_error'
+    KAFKA_TOPIC:str = 'auth_logging'
+    KAFKA_APP_ERROR_TOPIC:str = 'app_error'
         
     class Config:
         env_file = ".env"

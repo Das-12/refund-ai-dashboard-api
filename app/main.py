@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 async def lifespan(app: FastAPI):
     try:
         await init_kafka_producer()
+        yield
     finally:
         await close_kafka_producer()
 
