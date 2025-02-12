@@ -9,7 +9,7 @@ from typing import List
 router = APIRouter()
 
 @router.post("/create_plan", response_model=Plan)
-async def create_plan(
+async def create_plans(
     request: Request,
     plan_data: PlanCreate,
     auth_user: dict = Depends(required_role(["super_admin"])),
@@ -27,7 +27,7 @@ async def create_plan(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/plans", response_model = List[Plan])
-async def get_all_plans(
+async def get_all_plan(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
@@ -38,7 +38,7 @@ async def get_all_plans(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/plans/{plan_id}", response_model = Plan)
-async def get_plan_by_id(
+async def get_plan_by_ids(
     request: Request,
     plan_id: int,
     auth_user: dict = Depends(required_role(["super_admin"])),
@@ -54,7 +54,7 @@ async def get_plan_by_id(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.put("/plans/{plan_id}", response_model = Plan)
-async def update_plan(
+async def update_plans(
     request: Request,
     plan_id: int,
     plan_data: PlanUpdate,
@@ -73,7 +73,7 @@ async def update_plan(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.delete("/plans/{plan_id}", response_model = Plan)
-async def delete_plan(
+async def delete_plans(
     request: Request,
     plan_id: int,
     auth_user: dict = Depends(required_role(["super_admin"])),

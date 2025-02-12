@@ -9,7 +9,7 @@ from typing import List
 router = APIRouter()
 
 @router.post("/create_subscription", response_model=SubscriptionResponse)
-async def create_subscription(
+async def create_subscriptions(
     request: Request,
     subscription_data: SubscriptionCreate,
     auth_user: dict = Depends(required_role(["super_admin"])),
@@ -27,7 +27,7 @@ async def create_subscription(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/subscriptions", response_model = List[SubscriptionResponse])
-async def get_all_subscriptions(
+async def get_all_subscription(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
@@ -38,7 +38,7 @@ async def get_all_subscriptions(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.get("/subscriptions/{subscription_id}", response_model = SubscriptionResponse)
-async def get_subscription_by_id(
+async def get_subscription_by_ids(
     request: Request,
     subscription_id: int,
     auth_user: dict = Depends(required_role(["super_admin"])),
@@ -54,7 +54,7 @@ async def get_subscription_by_id(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.put("/subscriptions/{subscription_id}", response_model = SubscriptionResponse)
-async def update_subscription(
+async def update_subscriptions(
     request: Request,
     subscription_id: int,
     subscription_data: SubscriptionUpdate,
@@ -73,7 +73,7 @@ async def update_subscription(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
 @router.delete("/subscriptions/{subscription_id}", response_model = SubscriptionResponse)
-async def delete_subscription(
+async def delete_subscriptions(
     request: Request,
     subscription_id: int,
     auth_user: dict = Depends(required_role(["super_admin"])),

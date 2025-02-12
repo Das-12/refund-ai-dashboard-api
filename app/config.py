@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     MONGO_PORT:int = 27017
     MONGO_AUTH_SOURCE:str = 'admin'
     
+    KAFKA_BROKER_URL: str = '159.89.199.213:9092'
+    KAFKA_USERNAME: str = 'arshad'
+    KAFKA_PASSWORD: str = 'KldkhhmS392'
     KAFKA_TOPIC:str = 'auth_logging'
     KAFKA_APP_ERROR_TOPIC:str = 'app_error'
         
