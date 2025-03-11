@@ -38,6 +38,7 @@ async def send_request(
 
     logging.debug(f"Request to {endpoint} returned status: {response.status_code}")
     logging.debug(f"Response text: {response.text}")
+    # print(f"this is response {response.status_code, response.text}")
 
     if response.status_code in {200, 201}:
         try:

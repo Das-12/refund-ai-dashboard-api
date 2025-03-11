@@ -27,7 +27,7 @@ async def verify_token(request: Request):
     authorization: str = request.headers.get("Authorization")
     apikey: str = request.headers.get("api-key")
     url = str(request.url)
-    print(request.headers)
+    # print(request.headers)
 
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
@@ -50,7 +50,7 @@ async def verify_token(request: Request):
         if response.status_code == 200:
             user_data = response.json()
             user_role = user_data.get("role")
-            print(f"This is user data in verify {user_data}")
+            # print(f"This is user data in verify {user_data}")
 
             if user_role == "super_admin":
                 return user_data
@@ -62,10 +62,10 @@ async def verify_token(request: Request):
                 )
             
             return user_data
-
-        raise HTTPException(
+        else:
+            raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        )
+            )
     
     
 def required_role(required_roles:list[str]):
@@ -73,7 +73,7 @@ def required_role(required_roles:list[str]):
     async def role_permission_dependency(user_data: dict = Depends(verify_token)):
         
         user_role = user_data.get("role")
-        print(f"this is user data {user_role}")
+        # print(f"this is user data {user_role}")
         if not user_role:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="user role not found")
         
@@ -130,10 +130,13 @@ async def create_company(request: Request, company_data: dict, auth_user: dict =
         headers = {"Authorization": f"Bearer {token}"}
         response = await client.post(CREATE_COMPANY, json=company_data, headers=headers)
         
+        # print(f"this is response status code {response.status_code}")
+        # print(f"this is response text {response.text}")
         if response.status_code == 201:
             return response.json()
-        logging.info(f"this is logging response.text {response.text}")
-        raise HTTPException(status_code=response.status_code, detail="not authorized")
+        else:
+            logging.info(f"this is logging response.text {response.text}")
+            raise HTTPException(status_code=response.status_code, detail="not authorized")
     
 
 async def update_company(request: Request, company_id: int, company_data: dict, auth_user: dict = Depends(required_role(["super_admin"]))):

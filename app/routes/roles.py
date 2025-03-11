@@ -17,16 +17,16 @@ async def create_role(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
+    if auth_user.get("role") != "super_admin":
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
     try:
-        if auth_user.get("role") != "super_admin":
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-
         role_dict = role_data.model_dump()  
 
         role_out = await create_roles(request, role_dict, client=client)
         return role_out
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+        print(f"error is {str(e)}")
+        raise HTTPException(status_code=404,detail=str(e))
 
 @router.get("/roles", response_model = List[MultiRoleOut])
 async def get_all_role(
