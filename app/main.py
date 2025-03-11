@@ -1,5 +1,5 @@
 from fastapi import FastAPI, Request
-from app.routes import auth, logs, roles, permissions, plans, subscriptions
+from app.routes import auth, logs, roles, permissions, plans, subscriptions, currency_conversion
 from app.log_middleware import LoggingMiddleware
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -56,3 +56,4 @@ app.include_router(permissions.router, tags=["permissions"])
 app.include_router(plans.router, tags=["plans"])
 app.include_router(subscriptions.router, tags=["subscriptions"])
 app.add_middleware(LoggingMiddleware)
+app.include_router(currency_conversion.router, tags=["currency"])

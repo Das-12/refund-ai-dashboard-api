@@ -31,11 +31,11 @@ async def get_all_plan(
     request: Request,
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
-    try:
-        plans_data = await get_all_plans(request, client)
-        return plans_data
-    except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+    # try:
+    plans_data = await get_all_plans(request, client)
+    return plans_data
+    # except Exception as e:
+    #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/plans/{plan_id}", response_model = Plan)
 async def get_plan_by_ids(

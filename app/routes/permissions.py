@@ -69,7 +69,7 @@ async def get_user_permission_token(
         
         return permission_out
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/permissions/{username}", response_model=AssignPermissionsOut)
 async def dashboard_get_user_permissions(
