@@ -2,8 +2,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 class RoleBase(BaseModel):
-    name: str
-    description: str
+    name: Optional[str] = None
+    description: Optional[str] = None
 
 class RoleCreate(RoleBase):
     pass
