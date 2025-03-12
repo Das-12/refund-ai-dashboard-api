@@ -32,7 +32,7 @@ async def send_request(
     elif method == "PUT":
         response = await client.put(endpoint, json=payload, headers=headers)
     elif method == "DELETE":
-        response = await client.delete(endpoint, json=payload, headers=headers)
+        response = await client.delete(endpoint, headers=headers)
     else:
         raise ValueError(f"Unsupported HTTP method: {method}")
 

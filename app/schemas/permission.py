@@ -15,8 +15,8 @@ class permissionOut(permissionBase):
         from_attributes = True
         
 class AssignPermissionRequest(BaseModel):
-    role_name: str
-    permission_name: str
+    role_id: int
+    permission_id: Optional[List[int]] = None
     
 class AssignPermissionsOut(BaseModel):
     username: str

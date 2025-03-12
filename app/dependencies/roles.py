@@ -56,3 +56,20 @@ async def roles_from_username(
     token = get_bearer_token(request)
     url = f"http://authentication-service:8000/permissions/roles/{username}"
     return await send_request("GET", url, token, {}, client)
+
+async def update_role(request: Request, role_id: int, role_data: dict, client: httpx.AsyncClient):
+    """
+    Updates role from the authentication service.
+    """
+    token = get_bearer_token(request)
+    url = f"http://authentication-service:8000/permissions/update_role/{role_id}"
+    return await send_request("PUT", url, token, role_data, client)
+
+
+async def delete_role(request: Request, role_id: int, client: httpx.AsyncClient):
+    """
+    Updates role from the authentication service.
+    """
+    token = get_bearer_token(request)
+    url = f"http://authentication-service:8000/permissions/delete_role/{role_id}"
+    return await send_request("DELETE", url, token, {}, client) 
