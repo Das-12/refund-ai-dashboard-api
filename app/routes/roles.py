@@ -1,6 +1,6 @@
 from app.dependencies.roles import (
     required_role, create_roles, assign_role, get_async_client, roles_from_token,
-    roles_from_username, get_all_roles, update_role, delete_role
+    roles_from_username, get_all_roles, update_role, delete_role, get_role_by_id
     )
 from fastapi import Depends, APIRouter
 from app.schemas.roles import RoleCreate, RoleOut, AssignRoleRequest, AssignRoleOut, MultiRoleOut
@@ -135,6 +135,17 @@ async def dashboard_delete_role(role_id: int,
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
             detail={str(e)}  # Return the actual error message
         )
-    
-    
-    
+
+
+@router.get("/get_role_by_id/{role_id}", response_model=MultiRoleOut)
+async def dashboard_get_role_by_id(role_id: int,
+                                request: Request,
+                                client: httpx.AsyncClient = Depends(get_async_client)):
+    """
+    Dashboard endpoint that returns the role by id
+    """
+    try:
+        roles_data = await get_role_by_id(request, role_id, client)
+        return roles_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))

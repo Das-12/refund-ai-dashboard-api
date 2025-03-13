@@ -15,6 +15,7 @@ async def create_plans(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)
 ):
+    # print("plan create dashboard started")
     try:
         if auth_user.get("role") != "super_admin":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
