@@ -73,3 +73,16 @@ async def delete_role(request: Request, role_id: int, client: httpx.AsyncClient)
     token = get_bearer_token(request)
     url = f"http://authentication-service:8000/permissions/delete_role/{role_id}"
     return await send_request("DELETE", url, token, {}, client) 
+
+
+async def get_role_by_id(
+    request: Request,
+    role_id: int,
+    client: httpx.AsyncClient
+) -> dict:
+    """
+    Retrieves roles for the given username from the authentication service.
+    """
+    token = get_bearer_token(request)
+    url = f"http://authentication-service:8000/permissions/get_role_by_id/{role_id}"
+    return await send_request("GET", url, token, {}, client)

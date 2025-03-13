@@ -12,7 +12,9 @@ def get_bearer_token(request: Request) -> str:
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Missing or invalid token"
         )
-    return auth_header.split("Bearer ")[1]
+    token = auth_header.split("Bearer ")[1]
+    extracted_token = extract_token(token)
+    return extracted_token
 
 async def send_request(
     method: str,
@@ -65,3 +67,18 @@ async def send_request(
 async def get_async_client() -> httpx.AsyncClient:
     async with httpx.AsyncClient() as client:
         yield client
+        
+def extract_token(token):
+    if isinstance(token, str):
+        try:
+            token = json.loads(token)  # Convert string to a Python object
+        except json.JSONDecodeError:
+            # print("Error: token_request is not valid JSON")
+            token = None
+    
+    if isinstance(token, list):
+        if isinstance(token[0], dict) and "access_token" in token[0]:
+            token = token[0]["access_token"]
+        elif len(token) > 1 and isinstance(token[1], str):
+            token = token[1]
+    return token

@@ -1,6 +1,8 @@
 import httpx
 from fastapi import Depends, HTTPException, status, Request
 import logging
+import json
+from app.utils import extract_token
 
 logging.basicConfig(
     level=logging.INFO,
@@ -24,6 +26,7 @@ UPDATE_USER = "http://authentication-service:8000/auth/update_user/{user_id}"
 DELETE_USER = "http://authentication-service:8000/auth/delete_user/{user_id}"
 
 async def verify_token(request: Request):
+    # print(f"this is request {request}")
     authorization: str = request.headers.get("Authorization")
     apikey: str = request.headers.get("api-key")
     url = str(request.url)
@@ -36,7 +39,8 @@ async def verify_token(request: Request):
         )
     
     token = authorization.split("Bearer ")[1]
-    if not token:
+    extracted_token = extract_token(token)
+    if not extracted_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing token"
@@ -44,9 +48,9 @@ async def verify_token(request: Request):
     
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            AUTH_SERVICE_URL, json={"token": token, "api_key": apikey, "from_url": url}
+            AUTH_SERVICE_URL, json={"token": extracted_token, "api_key": apikey, "from_url": url}
         )
-        
+        # print(f"response status code is {response.status_code}")
         if response.status_code == 200:
             user_data = response.json()
             user_role = user_data.get("role")
