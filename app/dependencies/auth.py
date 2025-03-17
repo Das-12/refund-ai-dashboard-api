@@ -39,8 +39,22 @@ async def verify_token(request: Request):
         )
     
     token = authorization.split("Bearer ")[1]
-    extracted_token = extract_token(token)
-    if not extracted_token:
+    print(f"this is token before extracting {token}")
+    if isinstance(token, str):
+        try:
+            token = json.loads(token)  # Convert string to a Python object
+        except json.JSONDecodeError:
+            print("Error: token_request is not valid JSON")
+            
+    
+    if isinstance(token, list):
+        if isinstance(token[0], dict) and "access_token" in token[0]:
+            token = token[0]["access_token"]
+        elif len(token) > 1 and isinstance(token[1], str):
+            token = token[1]
+    print(f"this is token after extracting {token}")
+    # extracted_token = extract_token(token)
+    if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing token"
@@ -48,7 +62,7 @@ async def verify_token(request: Request):
     
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            AUTH_SERVICE_URL, json={"token": extracted_token, "api_key": apikey, "from_url": url}
+            AUTH_SERVICE_URL, json={"token": token, "api_key": apikey, "from_url": url}
         )
         # print(f"response status code is {response.status_code}")
         if response.status_code == 200:
@@ -77,7 +91,7 @@ def required_role(required_roles:list[str]):
     async def role_permission_dependency(user_data: dict = Depends(verify_token)):
         
         user_role = user_data.get("role")
-        # print(f"this is user data {user_role}")
+        print(f"this is user data {user_role}")
         if not user_role:
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="user role not found")
         
