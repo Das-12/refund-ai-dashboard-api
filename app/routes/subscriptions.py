@@ -13,7 +13,7 @@ async def create_subscriptions(
     request: Request,
     subscription_data: SubscriptionCreate,
     auth_user: dict = Depends(required_role(["super_admin"])),
-    client: httpx.AsyncClient = Depends(get_async_client)
+    client: httpx.AsyncClient = Depends(get_async_client)   
 ):
     try:
         if auth_user.get("role") != "super_admin":
@@ -24,7 +24,7 @@ async def create_subscriptions(
         subscription_out = await create_subscription(request, subscription_dict, client)
         return subscription_out
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/subscriptions", response_model = List[SubscriptionResponse])
 async def get_all_subscription(
