@@ -13,8 +13,7 @@ def get_bearer_token(request: Request) -> str:
             detail="Missing or invalid token"
         )
     token = auth_header.split("Bearer ")[1]
-    extracted_token = extract_token(token)
-    return extracted_token
+    return token
 
 async def send_request(
     method: str,

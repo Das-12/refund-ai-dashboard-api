@@ -1,7 +1,7 @@
 import httpx
 from fastapi import Depends, HTTPException, status, Request
 from .auth import required_role
-from app.utils import get_bearer_token, send_request, get_async_client
+from app.utils import get_bearer_token, send_request, get_async_client, extract_token
 
 CREATE_PLAN = "http://authentication-service:8000/subscriptions/plans"
 
@@ -13,7 +13,8 @@ async def create_plan(
 ):
     """Creates plans by forwarding the request to the authentication service."""
     token = get_bearer_token(request)
-    return await send_request("POST", CREATE_PLAN, token, plan_data, client)
+    extracted_token = extract_token(token)
+    return await send_request("POST", CREATE_PLAN, extracted_token, plan_data, client)
 
 async def get_all_plans(
     request: Request,
