@@ -191,19 +191,19 @@ async def delete_company(request: Request, company_id: int, auth_user: dict = De
     
     
 async def create_user(request: Request, user_data: dict, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
-    
+    print("inside create_user dependency")
     token = request.headers.get("Authorization").split("Bearer ")[1]
     
     if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
-    
+        print(f"this is userrole {auth_user.get("role")}")
         async with httpx.AsyncClient() as client:
             headers = {"Authorization": f"Bearer {token}"}
             response = await client.post(CREATE_USER, json=user_data, headers=headers)
-            
+            print(f"response status code is {response.status_code}")
             if response.status_code == 201:
                 return response.json()
             logging.info(f"this is logging response.text {response.text}")
-            raise HTTPException(status_code=response.status_code)
+            raise HTTPException(status_code=response.status_code, detail=response.text)
     else:    
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     

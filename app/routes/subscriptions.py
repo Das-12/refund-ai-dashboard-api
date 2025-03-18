@@ -15,10 +15,12 @@ async def create_subscriptions(
     auth_user: dict = Depends(required_role(["super_admin"])),
     client: httpx.AsyncClient = Depends(get_async_client)   
 ):
+    # print(f"sended to auth and this is type of start_date {type(subscription_data.start_date), subscription_data.start_date}")
     try:
         if auth_user.get("role") != "super_admin":
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
-        
+        if subscription_data.start_date:
+            subscription_data.start_date = subscription_data.start_date.isoformat()
         subscription_dict = subscription_data.model_dump()  
 
         subscription_out = await create_subscription(request, subscription_dict, client)

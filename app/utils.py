@@ -26,6 +26,7 @@ async def send_request(
     headers = {"Authorization": f"Bearer {token}"}
     method = method.upper()
     
+    print("inside send_request")
     if method == "GET":
         response = await client.get(endpoint, params=payload, headers=headers)
     elif method == "POST":
@@ -36,7 +37,7 @@ async def send_request(
         response = await client.delete(endpoint, headers=headers)
     else:
         raise ValueError(f"Unsupported HTTP method: {method}")
-
+    print("now really sended")
     logging.debug(f"Request to {endpoint} returned status: {response.status_code}")
     logging.debug(f"Response text: {response.text}")
     # print(f"this is response {response.status_code, response.text}")

@@ -13,6 +13,7 @@ async def create_subscription(
 ):
     """Creates subscriptions by forwarding the request to the authentication service."""
     token = get_bearer_token(request)
+    print(f"its sended to authentication")
     return await send_request("POST", CREATE_SUBSCRIPTIONS, token, subscription_data, client)
 
 async def get_all_subscriptions(
