@@ -69,7 +69,7 @@ async def create_user_data(user_data: dict = Depends(create_user)):
     try:
         return user_data
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
     
 @router.get("/get_user/{user_id}")
 async def get_user_data_by_id(user_id: int, user_data: dict = Depends(get_user_by_id)):
