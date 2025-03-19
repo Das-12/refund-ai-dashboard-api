@@ -25,7 +25,7 @@ async def create_plans(
         plan_out = await create_plan(request, plan_dict, client)
         return plan_out
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/plans", response_model = List[Plan])
 async def get_all_plan(
