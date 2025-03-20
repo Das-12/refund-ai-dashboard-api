@@ -2,12 +2,13 @@ from app.dependencies.roles import (
     required_role, create_roles, assign_role, get_async_client, roles_from_token,
     roles_from_username, get_all_roles, update_role, delete_role, get_role_by_id
     )
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Query
 from app.schemas.roles import RoleCreate, RoleOut, AssignRoleRequest, AssignRoleOut, MultiRoleOut
 from fastapi import HTTPException, status, Request
 import httpx
 from typing import List
 import logging
+from app.pagination import paginate
 
 router = APIRouter()
 
@@ -30,14 +31,16 @@ async def create_role(
         print(f"error is {str(e)}")
         raise HTTPException(status_code=404,detail=str(e))
 
-@router.get("/roles", response_model = List[MultiRoleOut])
-async def get_all_role(
-    request: Request,
-    client: httpx.AsyncClient = Depends(get_async_client)
-):
+@router.get("/roles", response_model = dict)
+async def get_all_role(request: Request,
+                        pagination: bool = True,
+                        skip: int = Query(1, alias="skip", ge=1),
+                        limit: int = Query(10, alias="limit", ge=1, le=100),
+                        client: httpx.AsyncClient = Depends(get_async_client)):
     try:
         roles_data = await get_all_roles(request, client)
-        return roles_data
+        pagination_data = paginate(roles_data, skip, limit, request, pagination)
+        return pagination_data
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 

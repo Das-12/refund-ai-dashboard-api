@@ -26,7 +26,7 @@ UPDATE_USER = "http://authentication-service:8000/auth/update_user/{user_id}"
 DELETE_USER = "http://authentication-service:8000/auth/delete_user/{user_id}"
 
 async def verify_token(request: Request):
-    print(f"this is request {request}")
+    # print(f"this is request {request}")
     authorization: str = request.headers.get("Authorization")
     apikey: str = request.headers.get("api-key")
     url = str(request.url)
@@ -59,9 +59,7 @@ async def verify_token(request: Request):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or missing token"
         )
-    print("Function started...")
     async with httpx.AsyncClient() as client:
-        print("Sending request...")
         response = await client.post(
             AUTH_SERVICE_URL, json={"token": token, "api_key": apikey, "from_url": url}
         )
@@ -88,7 +86,7 @@ async def verify_token(request: Request):
     
     
 def required_role(required_roles:list[str]):
-    print("inside required_role")
+    # print("inside required_role")
     async def role_permission_dependency(user_data: dict = Depends(verify_token)):
         
         user_role = user_data.get("role")

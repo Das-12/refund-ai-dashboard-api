@@ -1,7 +1,8 @@
 from app.dependencies.subscriptions import (
     create_subscription, get_all_subscriptions, get_subscription_by_id, update_subscription, delete_subscription, get_async_client, required_role
 )
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
+from app.pagination import paginate
 from app.schemas.subscriptions import SubscriptionCreate, SubscriptionResponse, SubscriptionUpdate
 import httpx
 from typing import List
@@ -28,14 +29,16 @@ async def create_subscriptions(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("/subscriptions", response_model = List[SubscriptionResponse])
-async def get_all_subscription(
-    request: Request,
-    client: httpx.AsyncClient = Depends(get_async_client)
-):
+@router.get("/subscriptions", response_model = dict)
+async def get_all_subscription(request: Request,
+                                pagination: bool = True,
+                                skip: int = Query(1, alias="skip", ge=1),
+                                limit: int = Query(10, alias="limit", ge=1, le=100),
+                                client: httpx.AsyncClient = Depends(get_async_client)):
     try:
         subscriptions_data = await get_all_subscriptions(request, client)
-        return subscriptions_data
+        pagination_data = paginate(subscriptions_data, skip, limit, request, pagination)
+        return pagination_data
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
