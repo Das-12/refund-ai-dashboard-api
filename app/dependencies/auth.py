@@ -223,7 +223,6 @@ async def get_user_by_id(request: Request, user_id: int, auth_user: dict = Depen
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
 
 async def get_all_user(request: Request, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
-    
     token = request.headers.get("Authorization").split("Bearer ")[1]
     
     if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
@@ -234,7 +233,7 @@ async def get_all_user(request: Request, auth_user: dict = Depends(required_role
             if response.status_code == 200:
                 user_data = response.json()
                 return user_data
-            raise HTTPException(status_code=response.status_code)
+            raise HTTPException(status_code=response.status_code, detail=response.text)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
 
