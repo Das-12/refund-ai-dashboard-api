@@ -1,10 +1,11 @@
 from app.dependencies.plans import (
     create_plan, get_all_plans, get_plan_by_id, update_plan, delete_plan, get_async_client, required_role
 )
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from app.schemas.plans import PlanCreate, Plan, PlanUpdate
 import httpx
 from typing import List
+from app.pagination import paginate
 
 router = APIRouter()
 
@@ -27,16 +28,18 @@ async def create_plans(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
-@router.get("/plans", response_model = List[Plan])
-async def get_all_plan(
-    request: Request,
-    client: httpx.AsyncClient = Depends(get_async_client)
-):
-    # try:
-    plans_data = await get_all_plans(request, client)
-    return plans_data
-    # except Exception as e:
-    #     raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+@router.get("/plans", response_model = dict)
+async def get_all_plan(request: Request,
+                        pagination: bool = True,
+                        skip: int = Query(1, alias="skip", ge=1),
+                        limit: int = Query(10, alias="limit", ge=1, le=100),
+                        client: httpx.AsyncClient = Depends(get_async_client)):
+    try:
+        plans_data = await get_all_plans(request, client)
+        pagination_data = paginate(plans_data, skip, limit, request, pagination)
+        return pagination_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @router.get("/plans/{plan_id}", response_model = Plan)
 async def get_plan_by_ids(

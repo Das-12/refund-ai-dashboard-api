@@ -2,7 +2,8 @@ from app.dependencies.auth import (
     required_role, get_company, get_company_by_id, create_company, update_company, delete_company, create_user, get_user_by_id, get_all_user,
     update_user, delete_user
     )
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter, HTTPException, status, Request, Query
+from app.pagination import paginate
 
 
 router = APIRouter()
@@ -30,9 +31,14 @@ async def staff_auth(user_data: dict = Depends(required_role(["staff"]))):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     
 @router.get("/get_company")
-async def get_company_data(company_data: dict = Depends(get_company)):
+async def get_company_data(request: Request,
+                           company_data: dict = Depends(get_company),
+                            pagination: bool = True,
+                            skip: int = Query(1, alias="skip", ge=1),
+                            limit: int = Query(10, alias="limit", ge=1, le=100)):
     try:
-        return company_data
+        paginated_data = paginate(company_data, skip, limit, request, pagination)
+        return paginated_data
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     
@@ -79,9 +85,14 @@ async def get_user_data_by_id(user_id: int, user_data: dict = Depends(get_user_b
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     
 @router.get("/get_user")
-async def get_all_user_data(user_data: dict = Depends(get_all_user)):
+async def get_all_user_data(request: Request,
+                            pagination: bool = True,
+                            skip: int = Query(1, alias="skip", ge=1),
+                            limit: int = Query(10, alias="limit", ge=1, le=100),
+                            user_data: dict = Depends(get_all_user)):
     try:
-        return user_data
+        paginated_data = paginate(user_data, skip, limit, request, pagination)
+        return paginated_data
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
     

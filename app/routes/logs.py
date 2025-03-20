@@ -9,8 +9,8 @@ router = APIRouter()
 async def get_all_logs(request: Request,
                        pagination: bool = True,
                        user_data: dict = Depends(required_role(["super_admin"])),
-                       page: int = Query(1, alias="page", ge=1),
-                        page_size: int = Query(10, alias="page_size", ge=1, le=100)):
+                       skip: int = Query(1, alias="skip", ge=1),
+                        limit: int = Query(10, alias="limit", ge=1, le=100)):
     try:
         logs = await get_all_logs_from_mongo()
         # Extract logs from the "counts" key
@@ -18,7 +18,7 @@ async def get_all_logs(request: Request,
             logs = logs["counts"]
         else:
             logs = []  # Fallback if "counts" key is missing
-        paginated_logs = paginate(logs, page, page_size, request, pagination)
+        paginated_logs = paginate(logs, skip, limit, request, pagination)
         return paginated_logs
         # return {"logs": logs}
     except Exception as e:
