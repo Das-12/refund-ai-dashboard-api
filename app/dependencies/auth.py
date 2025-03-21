@@ -110,7 +110,8 @@ async def get_company(request: Request, auth_user: dict = Depends(required_role(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(GET_COMPANY_URL, json={"token": token, "from_url": url})
+        headers = {"Authorization": f"Bearer {token}"}
+        response = await client.get(GET_COMPANY_URL, headers=headers)
         
         if response.status_code == 200:
             user_data = response.json()
@@ -128,13 +129,14 @@ async def get_company_by_id(request: Request, company_id: int, auth_user: dict =
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
     
     async with httpx.AsyncClient() as client:
-        response = await client.post(GET_COMPANY_BY_ID.format(company_id=company_id), json={"token": token, "from_url": from_url})
+        headers = {"Authorization": f"Bearer {token}"}
+        response = await client.get(GET_COMPANY_BY_ID.format(company_id=company_id), headers=headers)
         
         if response.status_code == 200:
             user_data = response.json()
             return user_data
         
-        raise HTTPException(status_code=response.status_code, detail="not authorized")
+        raise HTTPException(status_code=response.status_code, detail=response.text)
         
             
 async def create_company(request: Request, company_data: dict, auth_user: dict = Depends(required_role(["super_admin"]))):

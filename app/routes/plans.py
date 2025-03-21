@@ -76,7 +76,7 @@ async def update_plans(
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
-@router.delete("/plans/{plan_id}", response_model = Plan)
+@router.delete("/plans/{plan_id}", response_model = dict)
 async def delete_plans(
     request: Request,
     plan_id: int,
