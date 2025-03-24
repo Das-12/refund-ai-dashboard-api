@@ -69,12 +69,16 @@ async def get_async_client() -> httpx.AsyncClient:
         yield client
         
 def extract_token(token):
+    
+    if isinstance(token, str) and "." in token:  # JWTs contain dots
+        return token  
+    
     if isinstance(token, str):
         try:
             token = json.loads(token)  # Convert string to a Python object
         except json.JSONDecodeError:
             # print("Error: token_request is not valid JSON")
-            token = None
+            return None
     
     if isinstance(token, list):
         if isinstance(token[0], dict) and "access_token" in token[0]:
