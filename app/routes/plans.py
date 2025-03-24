@@ -1,5 +1,5 @@
 from app.dependencies.plans import (
-    create_plan, get_all_plans, get_plan_by_id, update_plan, delete_plan, get_async_client, required_role
+    create_plan, get_all_plans, get_plan_by_id, get_plan_by_company_id, update_plan, delete_plan, get_async_client, required_role
 )
 from fastapi import APIRouter, Depends, HTTPException, status, Request, Query
 from app.schemas.plans import PlanCreate, Plan, PlanUpdate
@@ -53,6 +53,23 @@ async def get_plan_by_ids(
             raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
         
         plan_data = await get_plan_by_id(request, plan_id, client)
+        return plan_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+    
+@router.get("/company/plans/{company_id}", response_model = Plan)
+async def get_plan_by_ids(
+    request: Request,
+    company_id: int,
+    auth_user: dict = Depends(required_role(["super_admin"])),
+    client: httpx.AsyncClient = Depends(get_async_client)
+):
+    print("route plan started")
+    try:
+        if auth_user.get("role") not in ["super_admin", "company"]:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Access forbidden for your role")
+        print("sended to company plan dependency")
+        plan_data = await get_plan_by_company_id(request, company_id, client)
         return plan_data
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")

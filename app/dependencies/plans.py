@@ -34,6 +34,18 @@ async def get_plan_by_id(
     url = f"http://authentication-service:8000/subscriptions/plans/{plan_id}"
     return await send_request("GET", url, token, {}, client)
 
+async def get_plan_by_company_id(
+    request: Request,
+    company_id: int,
+    client: httpx.AsyncClient
+):
+    """Retrieves a plan by company id from the authentication service."""
+    token = get_bearer_token(request)
+    print("request is about to send")
+    url = f"http://authentication-service:8000/subscriptions/company/plans/{company_id}"
+    print(f"request sended succeffully")
+    return await send_request("GET", url, token, {}, client)
+
 async def update_plan(
     request: Request,
     plan_id: int,

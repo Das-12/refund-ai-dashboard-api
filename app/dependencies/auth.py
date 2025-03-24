@@ -24,6 +24,7 @@ GET_USER_BY_ID = "http://authentication-service:8000/auth/get_user/{user_id}"
 GET_ALL_USER = "http://authentication-service:8000/auth/get_all_user"
 UPDATE_USER = "http://authentication-service:8000/auth/update_user/{user_id}"
 DELETE_USER = "http://authentication-service:8000/auth/delete_user/{user_id}"
+GET_USER_BY_COMPANY_ID = "http://authentication-service:8000/auth/get_user_by_company_id/{company_id}"
 
 async def verify_token(request: Request):
     # print(f"this is request {request}")
@@ -223,6 +224,23 @@ async def get_user_by_id(request: Request, user_id: int, auth_user: dict = Depen
             raise HTTPException(status_code=response.status_code)
     else:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+    
+    
+async def get_user_by_company_id(request: Request, company_id: int, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
+    
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin" or auth_user.get("role") == "company":
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.get(GET_USER_BY_COMPANY_ID.format(company_id=company_id), headers=headers)
+            if response.status_code == 200:
+                user_data = response.json()
+                return user_data
+            raise HTTPException(status_code=response.status_code)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+
 
 async def get_all_user(request: Request, auth_user: dict = Depends(required_role(["super_admin", "company"]))):
     token = request.headers.get("Authorization").split("Bearer ")[1]
