@@ -25,7 +25,8 @@ GET_ALL_USER = "http://authentication-service:8000/auth/get_all_user"
 UPDATE_USER = "http://authentication-service:8000/auth/update_user/{user_id}"
 DELETE_USER = "http://authentication-service:8000/auth/delete_user/{user_id}"
 GET_USER_BY_COMPANY_ID = "http://authentication-service:8000/auth/get_user_by_company_id/{company_id}"
-GET_HEADER_DATA = "http://authentication-service:8000/auth/header_api_first"
+GET_COMPANY_HEADER_DATA = "http://authentication-service:8000/auth/header_api_company"
+GET_USER_HEADER_DATA = "http://authentication-service:8000/auth/header_api_user"
 
 async def verify_token(request: Request):
     # print(f"this is request {request}")
@@ -288,13 +289,28 @@ async def delete_user(request: Request, user_id: int, auth_user: dict = Depends(
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
 
     
-async def get_header_data(request: Request, auth_user: dict = Depends(required_role(["super_admin"]))):
+async def get_company_header_data(request: Request, auth_user: dict = Depends(required_role(["super_admin"]))):
     token = request.headers.get("Authorization").split("Bearer ")[1]
     
     if auth_user.get("role") == "super_admin":
         async with httpx.AsyncClient() as client:
             headers = {"Authorization": f"Bearer {token}"}
-            response = await client.get(GET_HEADER_DATA, headers=headers)
+            response = await client.get(GET_COMPANY_HEADER_DATA, headers=headers)
+            print(f"this is response status code in dash {response.status_code}")
+            if response.status_code == 200:
+                return response.json()
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+    
+    
+async def get_user_header_data(request: Request, auth_user: dict = Depends(required_role(["super_admin"]))):
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "super_admin":
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.get(GET_USER_HEADER_DATA, headers=headers)
             print(f"this is response status code in dash {response.status_code}")
             if response.status_code == 200:
                 return response.json()

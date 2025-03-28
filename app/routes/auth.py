@@ -1,6 +1,6 @@
 from app.dependencies.auth import (
     required_role, get_company, get_company_by_id, create_company, update_company, delete_company, create_user, get_user_by_id, get_all_user,
-    update_user, delete_user, get_user_by_company_id,get_header_data
+    update_user, delete_user, get_user_by_company_id,get_company_header_data, get_user_header_data
     )
 from fastapi import Depends, APIRouter, HTTPException, status, Request, Query
 from app.pagination import paginate
@@ -121,8 +121,16 @@ async def delete_user_data(user_id: int, user_data: dict = Depends(delete_user))
 # async def create_role_data(role: dict = Depends(create_role)):
 #     return {"message": "role created"}
 
-@router.get("/get_first_header_data")
-async def get_header_data_endpoint(header_data: dict = Depends(get_header_data)):
+@router.get("/get_company_header_data")
+async def get_company_header_data_endpoint(header_data: dict = Depends(get_company_header_data)):
+    try:
+        return header_data
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+    
+    
+@router.get("/get_user_header_data")
+async def get_user_header_data_endpoint(header_data: dict = Depends(get_user_header_data)):
     try:
         return header_data
     except Exception as e:
