@@ -7,19 +7,23 @@ router = APIRouter()
 
 @router.get("/get_logs/")
 async def get_all_logs(request: Request,
+                       log_key: str = None,
                        pagination: bool = True,
                        user_data: dict = Depends(required_role(["super_admin"])),
                        skip: int = Query(1, alias="skip", ge=1),
-                        limit: int = Query(10, alias="limit", ge=1, le=100)):
+                       limit: int = Query(10, alias="limit", ge=1, le=100)):
     try:
-        logs = await get_all_logs_from_mongo()
+        print(f"this is log_key in route: {log_key}")
+        logs = await get_all_logs_from_mongo(log_key=log_key)
+        print(f"this is the type of logs: {type(logs)}")
         # Extract logs from the "counts" key
-        if isinstance(logs, dict) and "counts" in logs:
-            logs = logs["counts"]
+        if logs is not None:
+            paginated_logs = paginate(logs, skip, limit, request, pagination)
+            return paginated_logs
         else:
-            logs = []  # Fallback if "counts" key is missing
-        paginated_logs = paginate(logs, skip, limit, request, pagination)
-        return paginated_logs
+            logs = []
+ # Fallback if "counts" key is missing
+
         # return {"logs": logs}
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
