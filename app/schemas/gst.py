@@ -17,4 +17,4 @@ class GstCreate(BaseModel):
     non_refundable_taxes: str
     market: str
     class Config:
-        orm_mode = True
+        from_attributes = True
