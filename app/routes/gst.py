@@ -4,8 +4,8 @@ from typing import List, Optional
 from datetime import datetime
 from app.dependencies.plans import get_async_client
 from app.pagination import paginate
-from app.dependencies.gst import get_gst_data, get_all_gst_data, create_gst
-from app.schemas.gst import GstCreate
+from app.dependencies.gst import get_gst_data, get_all_gst_data, create_gst, update_gst
+from app.schemas.gst import GstCreate, GstUpdate
 
 
 
@@ -55,6 +55,22 @@ async def create_gst_endpoint(request: Request,gst_data: GstCreate, client: http
     try:
         gst_dict = gst_data.dict()
         gst_out = await create_gst(request, gst_dict, client)
+        return gst_out
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=str(e)
+        )
+
+
+@router.put("/update_gst")
+async def update_gst_endpoint(request: Request, mac: str, gst_data: GstUpdate, client: httpx.AsyncClient = Depends(get_async_client)):
+    """
+    Update GST data for a given MAC address.
+    """
+    try:
+        gst_dict = gst_data.dict()
+        gst_out = await update_gst(request, mac, gst_dict, client)
         return gst_out
     except Exception as e:
         raise HTTPException(

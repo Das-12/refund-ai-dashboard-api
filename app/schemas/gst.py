@@ -18,3 +18,18 @@ class GstCreate(BaseModel):
     market: str
     class Config:
         from_attributes = True
+        
+class GstUpdate(BaseModel):
+    mac: Optional[str] = None
+    raf: Optional[float] = None
+    gst_economy: Optional[float] = None
+    gst_premium_economy: Optional[float] = None
+    gst_business: Optional[float] = None
+    gst_first: Optional[float] = None
+    reissue_tax_code: Optional[str] = None
+    refund_tax_code: Optional[str] = None
+    non_refundable_taxes: Optional[str] = None
+    market: Optional[str] = None
+    
+    class Config:
+        from_attributes = True

@@ -12,6 +12,7 @@ CREATE_GST = "http://gst-service:8000/create_gst/"
 
 
 
+
 async def get_gst_data(request: Request, client: httpx.AsyncClient, mac:str):
     """Retrieves conversion rate from the currency conversion service with mac id."""
     token = get_bearer_token(request)
@@ -28,3 +29,11 @@ async def create_gst(request: Request,gst_data:GstCreate, client: httpx.AsyncCli
     """Retrieves all conversion rates from the currency conversion service."""
     token = get_bearer_token(request)
     return await send_request("POST", CREATE_GST, token, gst_data, client)
+
+
+
+async def update_gst(request: Request, mac:str, gst_data:GstCreate, client: httpx.AsyncClient):
+    """Retrieves all conversion rates from the currency conversion service."""
+    token = get_bearer_token(request)
+    url = f"http://gst-service:8000/update_gst/{mac}"
+    return await send_request("PUT", url, token, gst_data, client)
