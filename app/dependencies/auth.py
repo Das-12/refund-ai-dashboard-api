@@ -27,6 +27,7 @@ DELETE_USER = "http://authentication-service:8000/auth/delete_user/{user_id}"
 GET_USER_BY_COMPANY_ID = "http://authentication-service:8000/auth/get_user_by_company_id/{company_id}"
 GET_COMPANY_HEADER_DATA = "http://authentication-service:8000/auth/header_api_company"
 GET_USER_HEADER_DATA = "http://authentication-service:8000/auth/header_api_user"
+GET_HOMEPAGE_HEADER = "http://authentication-service:8000/auth/get_company_homepage_data"
 
 async def verify_token(request: Request):
     # print(f"this is request {request}")
@@ -34,7 +35,6 @@ async def verify_token(request: Request):
     apikey: str = request.headers.get("api-key")
     url = str(request.url)
     # print(request.headers)
-
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -312,6 +312,21 @@ async def get_user_header_data(request: Request, auth_user: dict = Depends(requi
             headers = {"Authorization": f"Bearer {token}"}
             response = await client.get(GET_USER_HEADER_DATA, headers=headers)
             print(f"this is response status code in dash {response.status_code}")
+            if response.status_code == 200:
+                return response.json()
+            raise HTTPException(status_code=response.status_code, detail=response.text)
+    else:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="access forbidden for your role")
+    
+    
+async def get_home_page_header_data(request: Request, auth_user: dict = Depends(required_role(["company"]))):
+    token = request.headers.get("Authorization").split("Bearer ")[1]
+    
+    if auth_user.get("role") == "company":
+        async with httpx.AsyncClient() as client:
+            headers = {"Authorization": f"Bearer {token}"}
+            response = await client.get(GET_HOMEPAGE_HEADER, headers=headers)
+            # print(f"this is response status code in dash {response.status_code}")
             if response.status_code == 200:
                 return response.json()
             raise HTTPException(status_code=response.status_code, detail=response.text)
