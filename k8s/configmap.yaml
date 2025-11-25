@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dashboard-service-env
+  namespace: refundai   
+data:
+  KAFKA_BROKER_URL: "kafka-broker-1.kafka.svc.cluster.local:9092"
+  KAFKA_USERNAME: ""
+  KAFKA_PASSWORD: ""
+  KAFKA_TOPIC: 'auth_logging'
+  KAFKA_APP_ERROR_TOPIC: 'app_error'
+
+  MONGO_USERNAME: "dashboard" 
+  MONGO_PASSWORD: "MongoPassword123!"
+  MONGO_HOST: "mongodb.mongodb.svc.cluster.local"
+  MONGO_PORT: "27017"
+  MONGO_AUTH_SOURCE: "admin"
+    
