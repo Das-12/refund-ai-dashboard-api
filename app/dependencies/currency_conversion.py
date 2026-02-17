@@ -3,7 +3,7 @@ from fastapi import Depends, HTTPException, status, Request
 from .auth import required_role
 from app.utils import get_bearer_token, send_request, get_async_client
 
-CURRENCY_CUNVERSION_URL = "http://currency-conversion-service:8000/conversion-rates/"
+CURRENCY_CUNVERSION_URL = os.getenv("CURRENCY_CONVERSION_UPDATE_URL", "http://currency-conversion-service:8000/conversion-rates/")
 
 
 

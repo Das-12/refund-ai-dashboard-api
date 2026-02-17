@@ -4,7 +4,7 @@ metadata:
   name: dashboard-service-env
   namespace: refundai   
 data:
-  KAFKA_BROKER_URL: "kafka-broker-1.kafka.svc.cluster.local:9092"
+  KAFKA_BROKER_URL: "kafka-service.infra.svc.cluster.local:9092"
   KAFKA_USERNAME: ""
   KAFKA_PASSWORD: ""
   KAFKA_TOPIC: 'auth_logging'
@@ -12,7 +12,7 @@ data:
 
   MONGO_USERNAME: "dashboard" 
   MONGO_PASSWORD: "MongoPassword123!"
-  MONGO_HOST: "mongodb.mongodb.svc.cluster.local"
+  MONGO_HOST: "mongodb.infra.svc.cluster.local"
   MONGO_PORT: "27017"
   MONGO_AUTH_SOURCE: "dashboard_db"
     
