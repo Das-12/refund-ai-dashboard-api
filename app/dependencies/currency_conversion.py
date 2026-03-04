@@ -1,4 +1,5 @@
 import httpx
+import os
 from fastapi import Depends, HTTPException, status, Request
 from .auth import required_role
 from app.utils import get_bearer_token, send_request, get_async_client
